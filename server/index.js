@@ -18,6 +18,7 @@ db.once("open", () => {
 });
 
 const messageSchema = new mongoose.Schema({
+  username: String,
   message: String,
   timestamp: Date,
 });
@@ -47,13 +48,13 @@ io.on("connection", async (socket) => {
   socket.on("message", async (msg) => {
     console.log("Received message:", msg);
 
-    const message = new Message({ message: msg, timestamp: new Date() });
+    const message = new Message({ username: msg.username, message: msg.message, timestamp: new Date() });
     try {
       const result = await message.save();
       console.log("Message saved to database:", result);
       // back
       const messages = await Message.find();
-      socket.emit("message", messages);
+      io.emit("message", messages);
     } catch (err) {
       console.error(err);
     }
